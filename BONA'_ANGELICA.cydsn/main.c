@@ -10,16 +10,35 @@
  * ========================================
 */
 #include "project.h"
+#include "stdio.h"
+#include "InterruptRoutines.h"
 
 int main(void)
 {
-    CyGlobalIntEnable; /* Enable global interrupts. */
-
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    CyGlobalIntEnable; 
+    AMux_FastSelect(0);
+    ADC_DelSig_Start();
+    UART_Start();
+    ISR_ADC_StartEx(Custom_ISR_ADC);
+    ISR_UART_StartEx(Custom_ISR_UART);
+    PacketReadyFlag = 0;
+    ADC_DelSig_StartConvert();
+    Clock_PWM_Start();
+    
+    
 
     for(;;)
     {
-        /* Place your application code here. */
+        if(PacketReadyFlag)
+        {
+            UART_PutString(DataBuffer);
+            PacketReadyFlag = 0;
+            if(LedON)
+                PWM_LED_Start();
+            else
+                PWM_LED_Stop();
+        }
+        
     }
 }
 
