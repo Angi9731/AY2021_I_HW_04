@@ -16,10 +16,14 @@
     #include "stdio.h"
     
     #define TRANSMIT_BUFFER_SIZE 16 //?????????????????????
+    
     unsigned int LedON;
+    
     CY_ISR_PROTO(Custom_ISR_UART);
     CY_ISR_PROTO(Custom_ISR_ADC);
-    char DataBuffer[ TRANSMIT_BUFFER_SIZE];
+    
+    char DataBuffer_PHOT[TRANSMIT_BUFFER_SIZE];
+    
     volatile uint8 PacketReadyFlag;
     
 #endif

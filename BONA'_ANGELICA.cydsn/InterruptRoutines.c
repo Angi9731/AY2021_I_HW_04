@@ -14,32 +14,42 @@
 
 #define ON 1
 #define OFF 0
+#define PHOTORESISTOR 0
+//#define POTENTIOMETER 1
 
 int32 value_digit;
 int32 value_mV;
 uint8 char_received;
 uint8 SendBytesFlag = 0;
 
-CY_ISR(Custom_ISR_ADC)
+CY_ISR(Custom_ISR_ADC) //Ogni 100ms
 {
     Timer_ReadStatusRegister();
-    if(SendBytesFlag)
+    
+    if(SendBytesFlag) //se era arrivata 'B' 0 'b'
     {
+        //FOTORESISTORE
+        
         value_digit = ADC_DelSig_Read32();
+        
         if(value_digit < 0)
             value_digit = 0;
         if(value_digit > 65535)
             value_digit = 65535;
+        
         value_mV = ADC_DelSig_CountsTo_mVolts(value_digit);
-        if(value_mV < 1000)
+        
+        if(value_mV < 3000)
         {
             LedON = 1;
         }
         else
             LedON = 0;
             
-        sprintf(DataBuffer, "Sample: %ld mV\r\n", value_mV);
+        sprintf(DataBuffer_PHOT, "Photoresistor: %ld mV\r\n", value_mV);
+        
         PacketReadyFlag = 1;
+        
     }
 }
 
