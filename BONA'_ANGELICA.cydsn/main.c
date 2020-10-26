@@ -12,42 +12,37 @@
 #include "project.h"
 #include "stdio.h"
 #include "InterruptRoutines.h"
-#define PHOTORESISTOR 0
-//#define OFF 0
+
 
 int main(void)
 {
-    CyGlobalIntEnable; 
-    AMux_FastSelect(PHOTORESISTOR);
+    CyGlobalIntEnable;
     ADC_DelSig_Start();
     UART_Start();
+    Timer_Start();
+    Clock_Timer_ADC_Start();
     ISR_ADC_StartEx(Custom_ISR_ADC);
     ISR_UART_StartEx(Custom_ISR_UART);
-    PacketReadyFlag = 0;
-    ADC_DelSig_StartConvert();
     Clock_PWM_Start();
-    //PWM_LED_Start();
+    PWM_LED_Start();
     
+    DataBuffer[0] = 0xA0;
+    DataBuffer[T_HOLD_MSB] = THRESHOLD_MSB;
+    DataBuffer[T_HOLD_LSB] = THRESHOLD_LSB;
+    DataBuffer[TRANSMIT_BUFFER_SIZE - 1] = 0xC0;
     
+    SendBytesFlag = 0;
+    flag_clock = 0;
 
     for(;;)
     {
-        if(PacketReadyFlag)//ho letto i due samples
+       if((SendBytesFlag)&&(flag_clock))
         {
-            UART_PutString(DataBuffer_PHOT);
-            //UART_PutString(DataBuffer_POT);
-            
-            PacketReadyFlag = 0;
-            
-            if(LedON)
-            { 
-                //PWM_LED_WriteCompare(50);
-                PWM_LED_Start();
-            }
-            else
-                PWM_LED_Stop();
-                //PWM_LED_WriteCompare(OFF);
+            UART_PutArray(DataBuffer,TRANSMIT_BUFFER_SIZE);
+            flag_clock = 0;
         }
+    
+        
         
     }
 }

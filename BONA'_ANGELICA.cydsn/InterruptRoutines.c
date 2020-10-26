@@ -11,47 +11,73 @@
 */
 #include "InterruptRoutines.h"
 #include "project.h"
+#include "stdio.h"
 
 #define ON 1
 #define OFF 0
-#define PHOTORESISTOR 0
-//#define POTENTIOMETER 1
 
-int32 value_digit;
-int32 value_mV;
+int32 level;
+int32 intensity;
 uint8 char_received;
-uint8 SendBytesFlag = 0;
 
-CY_ISR(Custom_ISR_ADC) //Ogni 100ms
+
+CY_ISR(Custom_ISR_ADC) //ogni 100ms
 {
+    flag_clock = 1;
     Timer_ReadStatusRegister();
     
-    if(SendBytesFlag) //se era arrivata 'B' 0 'b'
+    if(SendBytesFlag)//se è stato inserito 'B' o 'b'
     {
-        //FOTORESISTORE
+        ADC_DelSig_StopConvert();
+        AMux_FastSelect(PHOTORESISTOR);
+        ADC_DelSig_StartConvert();
+        level = ADC_DelSig_Read32();
         
-        value_digit = ADC_DelSig_Read32();
+        if(level < 0)
+            level = 0;
+        if(level > 65535)
+            level = 65535;
         
-        if(value_digit < 0)
-            value_digit = 0;
-        if(value_digit > 65535)
-            value_digit = 65535;
+        DataBuffer[BRIGHT_MSB] = level >> 8;
+        DataBuffer[BRIGHT_LSB] = level & 0xFF;
         
-        value_mV = ADC_DelSig_CountsTo_mVolts(value_digit);
-        
-        if(value_mV < 3000)
+        if(level < 25000)
         {
-            LedON = 1;
+           ADC_DelSig_StopConvert();
+           AMux_FastSelect(POTENTIOMETER);
+           ADC_DelSig_StartConvert();
+           
+           intensity = ADC_DelSig_Read32();
+        
+           if(intensity < 0)
+            intensity = 0;
+           if(intensity > 65535)
+            intensity = 65535;
+        
+           DataBuffer[POT_MSB] = intensity >> 8;
+           DataBuffer[POT_LSB] = intensity & 0xFF;
+        
+           PWM_LED_WriteCompare(intensity/257);
         }
-        else
-            LedON = 0;
-            
-        sprintf(DataBuffer_PHOT, "Photoresistor: %ld mV\r\n", value_mV);
         
+        else 
+        {
+            PWM_LED_WriteCompare(0);
+            DataBuffer[POT_MSB] = 0x00;
+            DataBuffer[POT_LSB] = 0x00;
+        }
+      
         PacketReadyFlag = 1;
+    }
+    
+    else
+    {
         
+        PWM_LED_WriteCompare(0);
     }
 }
+
+////////////////////////////////////////////////
 
 CY_ISR(Custom_ISR_UART)
 {
@@ -62,13 +88,13 @@ CY_ISR(Custom_ISR_UART)
         case 'b':
             SendBytesFlag = 1;
             Pin_EMBEDDED_LED_Write(ON);
-            Timer_Start();
+            
             break;
         case 'S':
         case 's':
             SendBytesFlag = 0;
             Pin_EMBEDDED_LED_Write(OFF);
-            Timer_Stop();
+            
             break;  
         default:
             break;
