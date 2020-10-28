@@ -9,15 +9,16 @@
  *
  * ========================================
 */
-#ifndef _SETTINGS_H
-    #define _SETTINGS_H
-    
-    
-    
-    
-    
-    
-    
-#endif
+
+#include "project.h"
+#include "GlobalVariables.h"
+
+void StartPeripherals(void);
+
+void StopPeripherals(void);
+
+void FixedBytes(void);
+
+void VariableBytes(void);
 
 /* [] END OF FILE */
