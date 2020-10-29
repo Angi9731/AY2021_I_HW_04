@@ -22,11 +22,10 @@ int main(void)
     ISR_ADC_StartEx(Custom_ISR_ADC);
     ISR_UART_StartEx(Custom_ISR_UART);
     
-    FixedBytes();
+    FixedBytes(); //Set the 4 fixed bytes
     
     SumLevel = 0;
     SumIntensity = 0;
-    
     SendBytesFlag = 0;
     flag_clock = 0;
 
@@ -34,7 +33,7 @@ int main(void)
     {
        if((SendBytesFlag)&&(flag_clock == 10)) //Every 100ms, if 'B' or 'b' have been received and 'S' or 's' haven't been received yet
         {
-            VariableBytes();
+            VariableBytes(); //Set the 4 variable bytes with mean values of room light and led intensity
             UART_PutArray(DataBuffer,TRANSMIT_BUFFER_SIZE); //transmits the 8 bytes
             SumLevel = 0;
             SumIntensity = 0;

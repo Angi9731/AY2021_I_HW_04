@@ -16,7 +16,7 @@
 static int32 MeanLevel;
 static int32 MeanIntensity;
 
-void StartPeripherals()
+void StartPeripherals() //Start ADC, Timer and PWM
 {
     ADC_DelSig_Start();
     Timer_Start();
@@ -25,7 +25,7 @@ void StartPeripherals()
     PWM_LED_Start();
 }
 
-void StopPeripherals()
+void StopPeripherals() //Stop ADC, Timer annd PWM
 {
     ADC_DelSig_Stop();
     Timer_Stop();
@@ -44,14 +44,15 @@ void FixedBytes()
 
 void VariableBytes()
 {
-    MeanLevel = SumLevel/10;
-    MeanIntensity = SumIntensity/10;
-    PWM_LED_WriteCompare(MeanIntensity/257);
+    MeanLevel = SumLevel/10; //Mean of 10 samples from photoresistor
+    MeanIntensity = SumIntensity/10; //Mean of 10 samples from potentiometer
+    
+    PWM_LED_WriteCompare(MeanIntensity/257); //Duty Cycle set such that MeanIntensity = 65535 --> DC = 255
     
     DataBuffer[PHOT_MSB] = MeanLevel >> 8; //save only the most significant byte
     DataBuffer[PHOT_LSB] = MeanLevel & 0xFF; //save only the least significant byte
     DataBuffer[POT_MSB] = MeanIntensity >> 8; //save only the most significant byte
-    DataBuffer[POT_LSB] = MeanIntensity & 0xFF; //save only the least signnificant byte
+    DataBuffer[POT_LSB] = MeanIntensity & 0xFF; //save only the least significant byte
            
 }
 

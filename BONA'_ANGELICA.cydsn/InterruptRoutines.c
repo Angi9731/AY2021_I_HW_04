@@ -22,7 +22,7 @@ int32 intensity; //variable to save the potentiometer sample
 uint8 char_received; //variable to save the character to start or stop the system remotely
 
 
-CY_ISR(Custom_ISR_ADC) //every 100ms the samples of the photoresistor and the potentiometer are saved
+CY_ISR(Custom_ISR_ADC) //every 10ms the samples of the photoresistor and the potentiometer are saved
 {
     flag_clock++;
     
@@ -35,7 +35,7 @@ CY_ISR(Custom_ISR_ADC) //every 100ms the samples of the photoresistor and the po
         
         level = ADC_DelSig_Read32(); //save sample in level
         
-        if(level < 0) //metto define anche qui
+        if(level < 0) 
             level = 0;
         if(level > 65535)
             level = 65535;
@@ -47,7 +47,7 @@ CY_ISR(Custom_ISR_ADC) //every 100ms the samples of the photoresistor and the po
            
            AMux_FastSelect(POTENTIOMETER); //Select potentiometer channel
            
-           intensity = ADC_DelSig_Read32();//save sample inn itensity
+           intensity = ADC_DelSig_Read32();//save sample in itensity
         
            if(intensity < 0)
             intensity = 0;
@@ -70,7 +70,7 @@ CY_ISR(Custom_ISR_ADC) //every 100ms the samples of the photoresistor and the po
     
     else 
     {
-        StopPeripherals();
+        StopPeripherals(); //If 'S' or 's' have been inserted stop ADC, Timer and PWM
     }
     
 }
@@ -87,7 +87,7 @@ CY_ISR(Custom_ISR_UART) //ISR executed on UART byte received
         case 'b':
             SendBytesFlag = 1;
             Pin_EMBEDDED_LED_Write(ON); //Embedded led ON
-            StartPeripherals();
+            StartPeripherals(); //Start ADC, Timer ad PWM
             break;
         case 'S':
         case 's':

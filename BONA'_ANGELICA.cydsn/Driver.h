@@ -13,12 +13,12 @@
 #include "project.h"
 #include "GlobalVariables.h"
 
-void StartPeripherals(void);
+void StartPeripherals(void); //Start Timer, ADC and PWM
 
-void StopPeripherals(void);
+void StopPeripherals(void); //Stop Timer, ADC and PWM
 
-void FixedBytes(void);
+void FixedBytes(void); //Set the 4 bytes to be sent that are fixed
 
-void VariableBytes(void);
+void VariableBytes(void); //Set the 4 bytes to be sent that vary
 
 /* [] END OF FILE */
